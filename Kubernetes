@@ -1,0 +1,137 @@
+Kubernetes
+==========
+K8 is the open-source tool for container orchestration
+
+Kubernetes provides following services
+
+- Kubernetes expose the containers with DNS nams or with its own IP address.
+- If traffic to container is high,kubernetes is able to load balance and distribute the network traffic.
+- It allows to mount the storage automatically.Storage could be from Local,Public Cloud etc.
+- We can automate the creation of desired container.We can roll-back the changes applied on the container.
+- In case if container fails,Kubernetes restart/replace the containers
+- Sensitive information like Password,OAuth tokens and SSH keys are safe
+
+Kubernetes Architecture
+=======================
+Kubernetes Architeture consist of a Contol Panel (Mater-Node) and a number of cluster nodes (Worker Node)
+
+     Control Panel ( Master Node )			Worker Nodes
+========================================	     ======================	
+                                                         Worker Node 1
+ectd -------------------> kube-apiserver		 ----------------
+control manager --------> kube-apiserver   <-------->    kubelet
+scheduler --------------> kube-apiserver		   container runtime
+                                                         (docker,rocket)	
+=========================================          =======================
+
+- Node, is a virtual machine or a physical machine wehre kubernetes is installed.
+  A node can be a Master node or a cluster of worker nodes
+  
+- Cluster, is a collection of nodes
+
+- Master Node, is also called as Control Panel,which is responsible for monitoring and managing the Worker nodes.
+  - Components of Master Node
+    - etcd, is a key-value store used by kubernetes for storing the information of all cluster data
+    - control manager, is responsible for noticing and responding when node goes down.
+    - scheduler, check for newly created PODs and see if the node is assigned to them.
+      Select a node for newly created node
+    - kube-apiserver, is the front-end of Control Panel.
+      All the communication between Control-Panel and Worker-Node is done via kube-apiserver.
+      Users interact with cluster from CLI,where CLI sends the command requets to kube-apiserver
+
+- Woker Node, contains containers where all the applications are deployed
+  - Components of Worker Node
+    - POD's, is the smallest object of worker-node which contains one-more containers
+    - Container-Runtime,could be docker or rocket
+    - kubelet,is agent which reside inside the worker-node and checks for the health status of the PODs container.
+      It send all the status to the Control-Panel
+      
+PODs
+====
+A POD is a collection of one or more running containers.
+PODs runs inside the Worker node.
+In case PODs fails we need to create the new POD again.However,to make life easier for creating the PODs,
+we can use WorkLoad Resources,which makes sure right number and right kind of PODs are created.
+
+WorkLoad Resources
+------------------
+- Replicaset
+  - Purpose of Replicaset is to maintain a stable set of PODs
+  - Make sure desired number of PODs are running
+  
+- Deployment
+  - Provides declarative updates for PODs and ReplicaSets
+  - Update the Deployment
+  - Rollback the Deployment to previous stable state
+  - Scale Up/Down
+  - Pause/Resume Deployments
+  
+- StatefulSet
+  - Ordered provisiong of PODs
+  - PODs are created in squence
+  - Each POD is assigned a sticky index-name.Index starting from 0-N
+  - In case PODs dies,new POD is created with same index number and name
+  - Unique name
+  - Unique Networking
+  
+  Limitations (StatefulSet)
+  - The storage for a given POD must either be provisioned by a PersistentVolume or pre-provisioned by admin
+  - Deleting or scalling of PODs will not delete the volumes associated with the PODs
+  - It requires Headless Service (ClusterIP=None) for network identity of the PODs
+  - It does not give guarantees on the termination of PODs
+  - Rolling Updates with default Pod Management Policy (OrderedReady) is not stable
+  
+- DaemonSet
+  - It ensures a copy of POD will run on all available Nodes
+  - As the nodes are removed from the cluster,PODs are garbage collected
+- Job
+  - In order to perform temperory task
+  - Run POD until the task is completed
+  - POD are not deleted automatically once the Job is completed
+  - POD need to be deleted manually
+  - Job controller restarts or rescheduled if a pod or node fails during execution
+  Use Cases
+  - One time initialization of resources such as Database
+ 
+- CronJob
+  - In order to perform task on certain scheduled time
+
+Storage
+-------
+- Volumes Types
+  - Local node: emptyDir,hostpath,local
+  - File sharing: nfs
+  - Cloud provider: awsElasticBlockStorage
+  - Special : persistent volume, persistent colume claim
+  
+Services
+--------
+Service resource lets us expose the application running in PODs to be reachable from outside of cluster.
+Also services can be used for accessing the PODs inside the cluster.
+It provides static IP
+Service identifies a set of POD using label selector.
+Unless mentioned otherwise Service are assumed to have vitrual ip only routable within the cluster network
+
+- ClusterIP
+- NodePort
+- LoadBalancer
+- Ingress
+
+Secrets
+-------
+- Small amount of sensitive data
+- Secrets are created outside of PODs
+- Not more than 1MB
+- Stored inside ETCD
+- Sent only to the target nodes
+
+- Creating Secrets
+  - Kubectl
+    - kubectl create secret {generic<File,Directory,Literal Value>,docker-registry,tls}
+    - $ echo -n 'admin' > username.txt
+      $ echo -n 'password' > password.txt
+    - $ kubectl create secret generic db-user-pass --from-file=username=./username.txt --from-file=password=./password.txt
+    - <db-user-pass> is the secret name
+
+
+

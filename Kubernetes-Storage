@@ -1,0 +1,51 @@
+Volumes
+=======
+Kubernetes supports many type of volumes.A POD can use multiple types of volumes simultaneously.Volumes with Ephemeral in nature have lifetime of a POD whereas persistent volumes exist beyond the lifetime of a POD.
+
+Types of Volumes
+----------------
+
+awsElasticBlockStore,volume mounts an AWS EBS volume into the POD.EBS volumes are persistent in nature i.e even if the POD is terminated the EBS volume and inside data won't get effected.
+
+There are some limitations of using AWS EBS Volumes
+- the node on which PODs are running should be EC2 instances
+- EBS volume should be on same region and availabilty zone as the EC2 instances
+- EBS only support one EC2 instance mounting a volume
+
+Steps for using AWS EBS Volume
+------------------------------
+- Set label of node
+  - $ kubectl label nodes <node-name> key=value
+  
+- Create AWS EBS
+  - $ aws ec2 create-volume --availability-zone=eu-west-1a --size=10 --volume-type=gp2
+  
+- AWS EBS configuration : Using AWS EBS inside a POD
+  
+  apiVersion: v1
+  kind: POD
+  metadata:
+    name: test-ebs
+  spec:
+    containers:
+    - image: nginx
+      name: nginx
+      volumeMounts:
+      - mountPath: /ebs-vol-0
+        name: ebs-vol
+    nodeSelector:
+      key=value
+    volumes:
+    - name: ebs-vol
+    awsElasticBlockStore:
+      volumeID: <ebs-volume-id>
+      fsType: ext4
+      partition: <partition number>
+
+Persistent Volumes
+------------------
+A Persistent Volume is a storage in the cluster which has been pre-provisioned by the admin or dynamically provisioned using Stroage Classses.PVs have life-cycle beyond PODs life-cyvle.
+
+Persistent Volume Claim
+-----------------------
+PVC is a request for storage by a user from PV

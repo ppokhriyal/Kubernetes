@@ -1,0 +1,70 @@
+Get All the informations
+========================
+kubectl get all
+
+Get more information
+====================
+kubectl get pods -o wide
+
+List PODs
+=========
+kubectl get pods
+
+Describe POD
+============
+kubectl describe pod pod_name
+
+Get list of Replicasets
+=======================
+kubectl get rc
+
+Create YAML Definition files
+============================
+kubectl create -f definition.yaml
+
+Edit Resource
+=============
+kubectl edit resource_name/created_resource_name
+eg. kubectl edit pod/mypod
+
+Get all the events
+==================
+kubectl get events
+
+Delete PODs
+===========
+kubectl delete pod pod_name
+
+Enter into Container
+====================
+kubectl exec --stdin --tty pod_name -- /bin/bash
+
+PODs Logs
+=========
+kubectl logs pod_name
+kubectl logs --tail=10 pod_name
+
+Get list of Replicasets
+=======================
+kubectl get rs
+
+Increase/Decrease no. of ReplicaSets
+====================================
+kubectl scale --replicas=3 rs/replica_name
+
+Autoscale ReplicaSet on desired CPU
+===================================
+kubectl autoscale rs replica_set_name --max=4 --min=2 --cpu-percent=80
+
+Rollout Deployment
+==================
+kubectl rollout status deployment deployment_name
+
+Updating Deployment
+===================
+kubectl edit deployment deployment_name --record
+kubectl rollout status deployment deployment_name
+
+RollBack Deployment Updates
+===========================
+kubectl rollout undo deployment deployment_name 
